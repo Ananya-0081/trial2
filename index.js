@@ -63,10 +63,37 @@ app.get("/patients", async (req,res)=>{
   }
 });
 
+/* -------- SEARCH (MUST BE BEFORE :id) -------- */
+
+app.get("/patients/search", async (req,res)=>{
+  try{
+
+    const { name, disease } = req.query;
+
+    let query = {};
+
+    if(name){
+      query.fullName = { $regex: name, $options: "i" };
+    }
+
+    if(disease){
+      query.disease = { $regex: disease, $options: "i" };
+    }
+
+    const patients = await Patient.find(query);
+
+    res.status(200).json(patients);
+
+  }catch(error){
+    res.status(500).json({message:error.message});
+  }
+});
+
 /* -------- GET BY ID -------- */
 
 app.get("/patients/:id", async (req,res)=>{
   try{
+
     const patient = await Patient.findById(req.params.id);
 
     if(!patient){
